@@ -1,0 +1,28 @@
+{
+  "wall": {
+    "width_meters": 23.0,
+    "height_meters": 3.0,
+    "coordinate_origin": "bottom_left_corner",
+    "axes": {
+      "x": "right along wall base",
+      "y": "up the wall face",
+      "z": "outward from wall into room"
+    }
+  },
+  "anchors": [
+    {
+      "id": "Anchor_Painting_For_Test_World_Coord",
+      "image_asset_name": "Anchor_Painting_For_Test_World_Coord",
+      "physical_width_meters": 1.01,
+      "blueprint_position": { "x": 1.0, "y": 1.505, "z": -0.505 },
+      "blueprint_yaw_degrees": 90.0
+    },
+    {
+      "id": "Anchor_Painting_TOP_RIGHT",
+      "image_asset_name": "Anchor_Painting_TOP_RIGHT",
+      "physical_width_meters": 0.54,
+      "blueprint_position": { "x": 1.0, "y": 1.74, "z": -0.775 },
+      "blueprint_yaw_degrees": 90.0
+    }
+  ]
+}

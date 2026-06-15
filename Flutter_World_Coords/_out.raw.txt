@@ -1,0 +1,13 @@
+Launching lib\main.dart on SM X730 (wireless) in debug mode...
+Running Gradle task 'assembleDebug'...                              6.9s
+ΓêÜ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...          13.4s
+D/FlutterJNI(10970): Beginning load of flutter...
+D/FlutterJNI(10970): flutter (null) was loaded normally!
+I/flutter (10970): [IMPORTANT:flutter/shell/platform/android/android_context_vk_impeller.cc(62)] Using the Impeller rendering backend (Vulkan).
+D/FlutterRenderer(10970): Width is zero. 0,0
+I/flutter (10970): [2026-06-15T17:20:59.118025] === AR Session started ===
+I/flutter (10970): [2026-06-15T17:20:59.160859] WallViewCubit: loading config files
+D/FlutterRenderer(10970): Width is zero. 0,0
+D/FlutterJNI(10970): Sending viewport metrics to the engine.
+I/flutter (10970): [2026-06-15T17:20:59.233832] Config loaded: 2 anchors, 4 POIs

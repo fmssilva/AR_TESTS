@@ -1,0 +1,36 @@
+{
+  "pois": [
+    {
+      "id": "BL",
+      "label": "BL",
+      "description": "Bottom Left corner of Anchor_Painting_For_Test_World_Coord",
+      "blueprint_position": { "x": 1.0, "y": 1.0, "z": 0.0 },
+      "icon_name": "BL",
+      "nearest_anchor_id": "Anchor_Painting_For_Test_World_Coord"
+    },
+    {
+      "id": "BR",
+      "label": "BR",
+      "description": "Bottom Right corner of Anchor_Painting_For_Test_World_Coord",
+      "blueprint_position": { "x": 1.0, "y": 1.0, "z": -1.01 },
+      "icon_name": "BR",
+      "nearest_anchor_id": "Anchor_Painting_For_Test_World_Coord"
+    },
+    {
+      "id": "TL",
+      "label": "TL",
+      "description": "Top Left corner of Anchor_Painting_For_Test_World_Coord",
+      "blueprint_position": { "x": 1.0, "y": 2.01, "z": 0.0 },
+      "icon_name": "TL",
+      "nearest_anchor_id": "Anchor_Painting_For_Test_World_Coord"
+    },
+    {
+      "id": "TR",
+      "label": "TR",
+      "description": "Top Right corner of Anchor_Painting_For_Test_World_Coord",
+      "blueprint_position": { "x": 1.0, "y": 2.01, "z": -1.01 },
+      "icon_name": "TR",
+      "nearest_anchor_id": "Anchor_Painting_TOP_RIGHT"
+    }
+  ]
+}
