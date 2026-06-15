@@ -1,0 +1,76 @@
+19:47:40.972 - ashmem Pinning is deprecated since Android Q. Please use trim or other methods.
+19:47:41.015 - obile3DTemplate [perfctl] 19854 19854 FPSGO ver:0
+19:47:41.015 - obile3DTemplate [perfctl] 0 0 0 0
+19:48:25.234 - ACameraManager getCurrentDeviceId: Failed to call getDeviceIdsForUid to determine device id for uid 10353: No error
+19:48:25.238 - ACameraManager getCurrentDeviceId: Failed to call getDeviceIdsForUid to determine device id for uid 10353: No error
+19:48:25.240 - ACameraManager getCurrentDeviceId: Failed to call getDeviceIdsForUid to determine device id for uid 10353: No error
+19:48:25.241 - ACameraManager getCurrentDeviceId: Failed to call getDeviceIdsForUid to determine device id for uid 10353: No error
+19:48:25.264 - libc The property "ro.build.fingerprint" has a value with length 92 that is too large for __system_property_get()/__system_property_read(); use __system_property_read_callback() instead.
+19:48:25.264 - libc The property "ro.build.fingerprint" has a value with length 92 that is too large for __system_property_get()/__system_property_read(); use __system_property_read_callback() instead.
+19:48:25.264 - libc The property "ro.build.fingerprint" has a value with length 92 that is too large for __system_property_get()/__system_property_read(); use __system_property_read_callback() instead.
+19:48:25.303 - native E0000 00:00:1781290105.303437   19870 session_lite_c_api.cc:153] operator(): width <= 0
+19:48:25.309 - native E0000 00:00:1781290105.309138   20110 android_data_source.cc:787] [Live DS] Callback list for SENSOR_TYPE_GYROSCOPE_UNCALIBRATED at ordinal 0 not found.
+19:48:25.458 - native E0000 00:00:1781290105.458505   19925 scheduler.cc:281] INTERNAL: RET_CHECK failure (third_party/mediapipe/framework/scheduler.cc:281) state_ != STATE_NOT_STARTED (0 vs. 0)
+19:48:25.458 - native Stack trace:
+19:48:25.458 - native E0000 00:00:1781290105.458565   19925 normal_detector_cpu.cc:236] Error graph_->WaitUntilIdle():INTERNAL: RET_CHECK failure (third_party/mediapipe/framework/scheduler.cc:281) state_ != STATE_NOT_STARTED (0 vs. 0)
+19:48:25.458 - native === Source Location Trace: ===
+19:48:25.458 - native third_party/mediapipe/framework/scheduler.cc:281
+19:48:25.458 - native third_party/mediapipe/framework/calculator_graph.cc:941
+19:48:25.460 - native E0000 00:00:1781290105.460122   19870 session_lite_c_api.cc:153] operator(): width <= 0
+19:48:25.550 - [.\Library\PackageCache\com.immersal.core@5b0f144e2350\Runtime\Scripts\XR\Platforms\ARFoundationSupport] Could not acquire camera image.
+19:48:25.550 - UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+19:48:25.550 - Immersal.XR.<GetCameraData>d__30:MoveNext()
+19:48:25.550 - System.Threading.ExecutionContext:RunInternal(ExecutionContext, ContextCallback, Object, Boolean)
+19:48:25.550 - System.Runtime.CompilerServices.MoveNextRunner:Run()
+19:48:25.550 - UnityEngine.WorkRequest:Invoke()
+19:48:25.550 - UnityEngine.UnitySynchronizationContext:Exec()
+19:48:25.550 - Unity
+19:48:25.686 - [.\Library\PackageCache\com.immersal.core@5b0f144e2350\Runtime\Scripts\XR\Platforms\ARFoundationSupport] Could not acquire camera image.
+19:48:25.686 - UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+19:48:25.686 - Immersal.XR.<GetCameraData>d__30:MoveNext()
+19:48:25.686 - System.Threading.ExecutionContext:RunInternal(ExecutionContext, ContextCallback, Object, Boolean)
+19:48:25.686 - System.Runtime.CompilerServices.MoveNextRunner:Run()
+19:48:25.686 - UnityEngine.WorkRequest:Invoke()
+19:48:25.686 - UnityEngine.UnitySynchronizationContext:Exec()
+19:48:25.686 - Unity
+19:48:25.743 - [.\Library\PackageCache\com.immersal.core@5b0f144e2350\Runtime\Scripts\XR\Platforms\ARFoundationSupport] Could not acquire camera image.
+19:48:25.743 - UnityEngine.DebugLogHandler:Internal_Log(LogType, LogOption, String, Object)
+19:48:25.743 - Immersal.XR.<GetCameraData>d__30:MoveNext()
+19:48:25.743 - System.Threading.ExecutionContext:RunInternal(ExecutionContext, ContextCallback, Object, Boolean)
+19:48:25.743 - System.Runtime.CompilerServices.MoveNextRunner:Run()
+19:48:25.743 - UnityEngine.WorkRequest:Invoke()
+19:48:25.743 - UnityEngine.UnitySynchronizationContext:Exec()
+19:48:25.743 - Unity
+19:48:25.746 - native E0000 00:00:1781290105.746504   20095 feature_tracks_producer.cc:1441] Feature RANSAC inlier is less than threshold (0/20).
+19:48:25.771 - native E0000 00:00:1781290105.771340   20277 static_feature_frame_selector.cc:81] Unknown old image at: 893978211505440 ns
+19:48:25.771 - native E0000 00:00:1781290105.771434   20277 static_feature_frame_selector.cc:81] Unknown old image at: 893978211505440 ns
+19:48:26.177 - native E0000 00:00:1781290106.177865   20089 ralph_kf.cc:431] [Ralph::Initialize] Extended Kalman Filter Correction failed.
+19:48:26.178 - native E0000 00:00:1781290106.178016   20089 ralph_kf.cc:431] [Ralph::Initialize] Extended Kalman Filter Correction failed.
+19:48:26.178 - native E0000 00:00:1781290106.178167   20089 ralph_kf.cc:431] [Ralph::Initialize] Extended Kalman Filter Correction failed.
+19:48:26.178 - native E0000 00:00:1781290106.178298   20089 ralph_kf.cc:431] [Ralph::Initialize] Extended Kalman Filter Correction failed.
+19:48:26.553 - native E0000 00:00:1781290106.553853   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (6.2235745ms) exceeds threshold (5ms).
+19:48:28.657 - native E0000 00:00:1781290108.657742   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (7.95039275ms) exceeds threshold (5ms).
+19:48:28.755 - native E0000 00:00:1781290108.755552   20094 ralph_visual_constraint_builder.cc:211] Too many image measurements. Skipping the rest. Noise blocks: 1425
+19:48:28.755 - native E0000 00:00:1781290108.755675   20094 ralph_visual_constraint_builder.cc:211] Too many image measurements. Skipping the rest. Noise blocks: 1425
+19:48:28.755 - native E0000 00:00:1781290108.755692   20094 ralph_visual_constraint_builder.cc:211] Too many image measurements. Skipping the rest. Noise blocks: 1425
+19:48:28.755 - native E0000 00:00:1781290108.755885   20092 ralph_visual_constraint_builder.cc:211] Too many image measurements. Skipping the rest. Noise blocks: 1425
+19:48:30.315 - native E0000 00:00:1781290110.315463   20197 android_data_source.cc:787] [Live DS] Callback list for SENSOR_TYPE_GYROSCOPE_UNCALIBRATED at ordinal 0 not found.
+19:48:30.765 - native E0000 00:00:1781290110.765044   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (6.08663275ms) exceeds threshold (5ms).
+19:48:32.840 - native E0000 00:00:1781290112.840287   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (5.97880025ms) exceeds threshold (5ms).
+19:48:34.866 - native E0000 00:00:1781290114.866820   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (5.9841065ms) exceeds threshold (5ms).
+19:48:35.316 - native E0000 00:00:1781290115.316205   20197 android_data_source.cc:787] [Live DS] Callback list for SENSOR_TYPE_GYROSCOPE_UNCALIBRATED at ordinal 0 not found.
+19:48:36.956 - native E0000 00:00:1781290116.956168   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (6.05746925ms) exceeds threshold (5ms).
+19:48:39.049 - native E0000 00:00:1781290119.049515   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (6.10364225ms) exceeds threshold (5ms).
+19:48:40.317 - native E0000 00:00:1781290120.317281   20197 android_data_source.cc:787] [Live DS] Callback list for SENSOR_TYPE_GYROSCOPE_UNCALIBRATED at ordinal 0 not found.
+19:48:41.051 - native E0000 00:00:1781290121.051451   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (6.123136ms) exceeds threshold (5ms).
+19:48:43.143 - native E0000 00:00:1781290123.143540   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (6.149775ms) exceeds threshold (5ms).
+19:48:45.145 - native E0000 00:00:1781290125.145772   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (6.083177ms) exceeds threshold (5ms).
+19:48:45.324 - native E0000 00:00:1781290125.324691   20197 android_data_source.cc:787] [Live DS] Callback list for SENSOR_TYPE_GYROSCOPE_UNCALIBRATED at ordinal 0 not found.
+19:48:47.243 - native E0000 00:00:1781290127.242826   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (6.07908225ms) exceeds threshold (5ms).
+19:48:49.342 - native E0000 00:00:1781290129.342056   20095 feature_tracks_producer.cc:886] Camera to IMU clock offset (6.1992485ms) exceeds threshold (5ms).
+19:48:50.118 - native E0000 00:00:1781290130.118801   19870 scheduler.cc:281] INTERNAL: RET_CHECK failure (third_party/mediapipe/framework/scheduler.cc:281) state_ != STATE_NOT_STARTED (0 vs. 0)
+19:48:50.118 - native Stack trace:
+19:48:50.120 - native E0000 00:00:1781290130.120032   19870 normal_detector_cpu.cc:236] Error graph_->WaitUntilIdle():INTERNAL: RET_CHECK failure (third_party/mediapipe/framework/scheduler.cc:281) state_ != STATE_NOT_STARTED (0 vs. 0)
+19:48:50.120 - native === Source Location Trace: ===
+19:48:50.120 - native third_party/mediapipe/framework/scheduler.cc:281
+19:48:50.120 - native third_party/mediapipe/framework/calculator_graph.cc:941
