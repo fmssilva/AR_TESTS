@@ -1,0 +1,140 @@
+{
+  "wall": {
+    "width_meters": 23.0,
+    "height_meters": 3.0,
+    "coordinate_origin": "wall_center",
+    "axes": {
+      "x": "positive to the right, negative to the left",
+      "y": "positive up, negative down",
+      "z": "positive outward from the wall into the room"
+    }
+  },
+  "anchors": [
+    {
+      "id": "Anchor_Big_0",
+      "image_asset_name": "Anchor_Big_0",
+      "physical_width_meters": 4.528,
+      "blueprint_position": { "x": -8.0, "y": 0.2, "z": 4.0 },
+      "blueprint_yaw_degrees": -40.0
+    },
+    {
+      "id": "Anchor_Big_1",
+      "image_asset_name": "Anchor_Big_1",
+      "physical_width_meters": 6.4,
+      "blueprint_position": { "x": -5.8, "y": 0.8, "z": 2.5 },
+      "blueprint_yaw_degrees": -25.0
+    },
+    {
+      "id": "Anchor_Big_2",
+      "image_asset_name": "Anchor_Big_2",
+      "physical_width_meters": 4.32,
+      "blueprint_position": { "x": -2.0, "y": 1.0, "z": 0.6 },
+      "blueprint_yaw_degrees": -10.0
+    },
+    {
+      "id": "Anchor_Big_3",
+      "image_asset_name": "Anchor_Big_3",
+      "physical_width_meters": 7.52,
+      "blueprint_position": { "x": 1.0, "y": 0.8, "z": 0.5 },
+      "blueprint_yaw_degrees": 10.0
+    },
+    {
+      "id": "Anchor_Big_4",
+      "image_asset_name": "Anchor_Big_4",
+      "physical_width_meters": 4.07,
+      "blueprint_position": { "x": 5.0, "y": 0.2, "z": 2.0 },
+      "blueprint_yaw_degrees": 25.0
+    },
+    {
+      "id": "Anchor_Big_5",
+      "image_asset_name": "Anchor_Big_5",
+      "physical_width_meters": 3.31,
+      "blueprint_position": { "x": 6.8, "y": 0.2, "z": 3.5 },
+      "blueprint_yaw_degrees": 40.0
+    },
+    {
+      "id": "Anchor_Close_0",
+      "image_asset_name": "Anchor_Close_0",
+      "physical_width_meters": 0.973,
+      "blueprint_position": { "x": -8.8, "y": 0.0, "z": 4.5 },
+      "blueprint_yaw_degrees": -45.0
+    },
+    {
+      "id": "Anchor_Close_1",
+      "image_asset_name": "Anchor_Close_1",
+      "physical_width_meters": 1.112,
+      "blueprint_position": { "x": -7.5, "y": -0.2, "z": 3.0 },
+      "blueprint_yaw_degrees": -30.0
+    },
+    {
+      "id": "Anchor_Close_2",
+      "image_asset_name": "Anchor_Close_2",
+      "physical_width_meters": 1.529,
+      "blueprint_position": { "x": -6.0, "y": 0.1, "z": 2.5 },
+      "blueprint_yaw_degrees": -25.0
+    },
+    {
+      "id": "Anchor_Close_3",
+      "image_asset_name": "Anchor_Close_3",
+      "physical_width_meters": 1.529,
+      "blueprint_position": { "x": -4.0, "y": 0.0, "z": 1.5 },
+      "blueprint_yaw_degrees": -20.0
+    },
+    {
+      "id": "Anchor_Close_4",
+      "image_asset_name": "Anchor_Close_4",
+      "physical_width_meters": 0.973,
+      "blueprint_position": { "x": -2.0, "y": -0.1, "z": 0.6 },
+      "blueprint_yaw_degrees": -10.0
+    },
+    {
+      "id": "Anchor_Close_5",
+      "image_asset_name": "Anchor_Close_5",
+      "physical_width_meters": 2.085,
+      "blueprint_position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+      "blueprint_yaw_degrees": 0.0
+    },
+    {
+      "id": "Anchor_Close_6",
+      "image_asset_name": "Anchor_Close_6",
+      "physical_width_meters": 1.39,
+      "blueprint_position": { "x": 1.0, "y": 1.0, "z": 0.5 },
+      "blueprint_yaw_degrees": 10.0
+    },
+    {
+      "id": "Anchor_Close_7",
+      "image_asset_name": "Anchor_Close_7",
+      "physical_width_meters": 1.946,
+      "blueprint_position": { "x": 3.0, "y": 0.0, "z": 1.0 },
+      "blueprint_yaw_degrees": 15.0
+    },
+    {
+      "id": "Anchor_Close_8",
+      "image_asset_name": "Anchor_Close_8",
+      "physical_width_meters": 0.695,
+      "blueprint_position": { "x": 5.0, "y": -0.5, "z": 2.0 },
+      "blueprint_yaw_degrees": 25.0
+    },
+    {
+      "id": "Anchor_Close_9",
+      "image_asset_name": "Anchor_Close_9",
+      "physical_width_meters": 0.973,
+      "blueprint_position": { "x": 5.8, "y": 0.5, "z": 2.5 },
+      "blueprint_yaw_degrees": 30.0
+    },
+    {
+      "id": "Anchor_Close_10",
+      "image_asset_name": "Anchor_Close_10",
+      "physical_width_meters": 0.695,
+      "blueprint_position": { "x": 6.2, "y": -0.3, "z": 3.0 },
+      "blueprint_yaw_degrees": 40.0
+    },
+    {
+      "id": "Anchor_Close_11",
+      "image_asset_name": "Anchor_Close_11",
+      "physical_width_meters": 0.695,
+      "blueprint_position": { "x": 8.0, "y": 0.4, "z": 4.0 },
+      "blueprint_yaw_degrees": 45.0
+    }
+  ]
+}

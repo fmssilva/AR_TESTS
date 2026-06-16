@@ -1,0 +1,92 @@
+{
+  "pois": [
+    {
+      "id": "POI_Dedo",
+      "label": "Dedo",
+      "description": "POI Dedo",
+      "blueprint_position": { "x": -8.8, "y": 0.0, "z": 4.5 },
+      "icon_name": "Dedo",
+      "nearest_anchor_id": "Anchor_Close_0"
+    },
+    {
+      "id": "POI_Flowers",
+      "label": "Flowers",
+      "description": "POI Flowers",
+      "blueprint_position": { "x": -7.5, "y": -0.2, "z": 3.0 },
+      "icon_name": "Flowers",
+      "nearest_anchor_id": "Anchor_Close_1"
+    },
+    {
+      "id": "POI_Map",
+      "label": "Map",
+      "description": "POI Map",
+      "blueprint_position": { "x": -6.0, "y": 0.1, "z": 2.5 },
+      "icon_name": "Map",
+      "nearest_anchor_id": "Anchor_Close_2"
+    },
+    {
+      "id": "POI_Rope",
+      "label": "Rope",
+      "description": "POI Rope",
+      "blueprint_position": { "x": -4.0, "y": 0.0, "z": 1.5 },
+      "icon_name": "Rope",
+      "nearest_anchor_id": "Anchor_Close_3"
+    },
+    {
+      "id": "POI_Sign",
+      "label": "Sign",
+      "description": "POI Sign",
+      "blueprint_position": { "x": -2.0, "y": -0.1, "z": 0.6 },
+      "icon_name": "Sign",
+      "nearest_anchor_id": "Anchor_Close_4"
+    },
+    {
+      "id": "POI_Priest",
+      "label": "Priest",
+      "description": "POI Priest",
+      "blueprint_position": { "x": 0.0, "y": 0.0, "z": 0.0 },
+      "icon_name": "Priest",
+      "nearest_anchor_id": "Anchor_Close_5"
+    },
+    {
+      "id": "POI_Flag",
+      "label": "Flag",
+      "description": "POI Flag",
+      "blueprint_position": { "x": 1.0, "y": 1.0, "z": 0.5 },
+      "icon_name": "Flag",
+      "nearest_anchor_id": "Anchor_Close_6"
+    },
+    {
+      "id": "POI_Boat_1",
+      "label": "Boat 1",
+      "description": "POI Boat 1",
+      "blueprint_position": { "x": 3.0, "y": 1.5, "z": 1.0 },
+      "icon_name": "Boat 1",
+      "nearest_anchor_id": "Anchor_Close_7"
+    },
+    {
+      "id": "POI_Pen",
+      "label": "Pen",
+      "description": "POI Pen",
+      "blueprint_position": { "x": 5.0, "y": -0.5, "z": 2.0 },
+      "icon_name": "Pen",
+      "nearest_anchor_id": "Anchor_Close_8"
+    },
+    {
+      "id": "POI_Cruzeiro",
+      "label": "Cruzeiro",
+      "description": "POI Cruzeiro",
+      "blueprint_position": { "x": 5.8, "y": 0.5, "z": 2.5 },
+      "icon_name": "Cruzeiro",
+      "nearest_anchor_id": "Anchor_Close_9"
+    },
+    {
+      "id": "POI_Boat_2",
+      "label": "Boat 2",
+      "description": "POI Boat 2",
+      "blueprint_position": { "x": 8.0, "y": 0.4, "z": 4.0 },
+      "icon_name": "Boat 2",
+      "nearest_anchor_id": "Anchor_Close_11"
+    }
+  ]
+}

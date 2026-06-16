@@ -10,9 +10,34 @@ data class AnchorBlueprintNative(
     val id: String,
     val imageAssetName: String,
     val physicalWidthMeters: Float,
-    val blueprintPose: Pose
+    val blueprintPose: Pose,
+    val imageAspectRatio: Float = 1f,
 ) {
     companion object {
+        // Build a blueprint pose from explicit blueprint-space values.
+        fun buildBlueprintPose(
+            x: Float,
+            y: Float,
+            z: Float,
+            yawDegrees: Float
+        ): Pose {
+            // ARCore AugmentedImage local frame: X=right, Y=outward(toward camera), Z=down.
+            // Our blueprint frame:               X=right, Y=up along wall,           Z=outward.
+            // To convert image-local -> flat-wall blueprint we apply Rx(+90deg).
+            // Then we rotate that blueprint frame around global +Y by blueprint_yaw_degrees.
+            val halfYawRadians = Math.toRadians((yawDegrees / 2.0).toDouble()).toFloat()
+            val rx90Pose = Pose(
+                floatArrayOf(0f, 0f, 0f),
+                floatArrayOf(0.7071068f, 0f, 0f, 0.7071068f)
+            )
+            val yawPose = Pose(
+                floatArrayOf(0f, 0f, 0f),
+                floatArrayOf(0f, sin(halfYawRadians), 0f, cos(halfYawRadians))
+            )
+            val combinedRotation = yawPose.compose(rx90Pose).rotationQuaternion
+            return Pose(floatArrayOf(x, y, z), combinedRotation)
+        }
+
         // Parse from the flat map format sent by ARSessionBridge.toChannelMap().
         fun from(map: Map<*, *>): AnchorBlueprintNative? {
             val id         = map["id"] as? String ?: return null
@@ -22,24 +47,7 @@ data class AnchorBlueprintNative(
             val y          = (map["blueprint_y"] as? Number)?.toFloat() ?: return null
             val z          = (map["blueprint_z"] as? Number)?.toFloat() ?: return null
             val yawDegrees = (map["blueprint_yaw_degrees"] as? Number)?.toFloat() ?: 0f
-            // ARCore AugmentedImage local frame: X=right, Y=outward(toward camera), Z=down.
-            // Our blueprint frame:               X=right, Y=up along wall,           Z=outward.
-            // To convert image-local → flat-wall blueprint we apply Rx(+90°).
-            // Then we rotate that blueprint frame around global +Y by blueprint_yaw_degrees.
-            // Positive yaw is clockwise viewed from above, matching the Dart ARMath contract.
-            // blueprintPose = Pose(translation, rotation) where rotation = Ry(yaw) × Rx(+90°) maps
-            // image-local coordinates BACK to blueprint coordinates, so that
-            // correctionPose = driftedPose × blueprintPose^-1 correctly places POI nodes:
-            //   blueprint-Y (up) → world-up    ✓
-            //   blueprint-Z (out)→ world-toward-camera ✓
-            val halfYawRadians = Math.toRadians((yawDegrees / 2.0).toDouble()).toFloat()
-            val rx90Pose = Pose(floatArrayOf(0f, 0f, 0f), floatArrayOf(0.7071068f, 0f, 0f, 0.7071068f))
-            val yawPose = Pose(
-                floatArrayOf(0f, 0f, 0f),
-                floatArrayOf(0f, sin(halfYawRadians), 0f, cos(halfYawRadians))
-            )
-            val combinedRotation = yawPose.compose(rx90Pose).rotationQuaternion
-            val pose = Pose(floatArrayOf(x, y, z), combinedRotation)
+            val pose = buildBlueprintPose(x, y, z, yawDegrees)
             return AnchorBlueprintNative(id, imageName, width, pose)
         }
     }

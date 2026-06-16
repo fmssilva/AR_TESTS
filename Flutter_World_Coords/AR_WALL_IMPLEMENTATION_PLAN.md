@@ -1,5 +1,30 @@
 # AR Wall — Complete Implementation Plan for AI Agent
 
+## Status Update — 2026-06-16
+
+The Android-first Flutter implementation now includes a Phase 1 calibration tool that fits the current production architecture without changing the main world-coordinate pipeline.
+
+Implemented:
+
+- `CalibrationCubit` and right-side calibration overlay in Flutter
+- shared `ARSessionBridge` calibration commands
+- selected-POI highlight in the Flutter overlay
+- native anchor-lock in `WorldCoordinateManager`
+- native live anchor pose nudges in `NativeARViewController`
+- native live POI node nudges in `POINodeBuilder`
+- JSON patch export for applying measured changes back into config assets
+
+Intentionally deferred:
+
+- native anchor reference-image overlay rendering
+- anchor width editing and ARCore image-database reconfiguration
+
+The method-channel seam was designed so that Phase 2 can add the anchor image overlay with minimal churn:
+
+- `setCalibrationViewState(enabled, selected_anchor_id, show_reference_image, reference_image_opacity)`
+
+That means the Flutter-side calibration state and native command shape are already prepared for image-overlay rendering when the next phase starts.
+
 > **Target:** A production-grade Flutter app with native ARKit (iOS) and ARCore (Android) integration  
 > **Scale:** 23-meter indoor tile wall · 10–20 image anchors · 150 interactive POIs  
 

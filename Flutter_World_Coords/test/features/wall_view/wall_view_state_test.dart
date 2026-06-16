@@ -1,4 +1,5 @@
 import 'package:ar_wall_app/core/ar/models/overlay_data.dart';
+import 'package:ar_wall_app/core/ar/models/anchor_blueprint.dart';
 import 'package:ar_wall_app/core/ar/models/poi_model.dart';
 import 'package:ar_wall_app/features/wall_view/cubit/wall_view_state.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,9 +23,19 @@ void main() {
       pois: [
         POIScreenPos(id: 'BL', label: 'BL', x: 0.4, y: 0.7),
       ],
+      anchors: [],
     );
 
     final state = WallViewReady(
+      anchors: [
+        AnchorBlueprint(
+          id: 'anchor_01',
+          imageAssetName: 'anchor_01',
+          physicalWidthMeters: 1.0,
+          blueprintPosition: Vector3.zero(),
+          blueprintYawDegrees: 0.0,
+        ),
+      ],
       pois: [
         POIModel(
           id: 'BL',
@@ -54,6 +65,7 @@ void main() {
         axisZy: double.nan,
         axisZVisible: false,
         pois: [],
+        anchors: [],
       ),
     );
 

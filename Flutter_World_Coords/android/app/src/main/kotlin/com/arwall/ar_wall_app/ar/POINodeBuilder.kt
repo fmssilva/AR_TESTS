@@ -14,6 +14,7 @@ class POINodeBuilder(
     // Accessible so NativeARViewController can read worldPositions for projection.
     internal val builtNodes = mutableListOf<io.github.sceneview.node.Node>()
     private val nodeLabels  = mutableMapOf<String, String>()  // id -> display label
+    private val nodesById   = mutableMapOf<String, io.github.sceneview.node.Node>()
 
     // Instantiate one Node per POI and attach them to the world root.
     fun buildAll() {
@@ -22,6 +23,7 @@ class POINodeBuilder(
             node.name     = poi.id
             node.position = Float3(poi.x, poi.y, poi.z)
             nodeLabels[poi.id] = poi.label
+            nodesById[poi.id] = node
             worldCoordinateManager.worldRootNode.addChildNode(node)
             builtNodes.add(node)
             android.util.Log.d("POINodeBuilder",
@@ -37,11 +39,21 @@ class POINodeBuilder(
             Triple(node.name ?: "?", nodeLabels[node.name] ?: node.name ?: "?", node.worldPosition)
         }
 
+    // Update one POI marker in blueprint-local coordinates.
+    fun updateNodePosition(id: String, x: Float, y: Float, z: Float): Boolean {
+        val node = nodesById[id] ?: return false
+        node.position = Float3(x, y, z)
+        android.util.Log.d("POINodeBuilder",
+            "POI '$id' updated to blueprint local ($x, $y, $z)")
+        return true
+    }
+
     // Remove all previously built nodes (called on session re-init).
     fun clearAll() {
         builtNodes.forEach { it.destroy() }
         builtNodes.clear()
         nodeLabels.clear()
+        nodesById.clear()
     }
 }
 

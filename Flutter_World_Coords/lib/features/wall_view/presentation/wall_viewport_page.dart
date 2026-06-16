@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../calibration/cubit/calibration_cubit.dart';
+import '../../calibration/presentation/calibration_overlay.dart';
 import '../../../core/ar/ar_native_view.dart';
 import '../cubit/wall_view_cubit.dart';
 import '../cubit/wall_view_state.dart';
@@ -89,6 +91,36 @@ class _WallViewportPageState extends State<WallViewportPage> {
                   activeAnchorId: state.activeAnchorId,
                   detectedCount: state.detectedAnchorIds.length,
                   overlayData: state.overlayData,
+                  anchors: state.anchors,
+                  isCalibrating: context.select(
+                    (CalibrationCubit cubit) => cubit.state.isCalibrating,
+                  ),
+                  isCorrectionFrozen: context.select(
+                    (CalibrationCubit cubit) => cubit.state.freezeCorrection,
+                  ),
+                  referenceAnchorId: context.select(
+                    (CalibrationCubit cubit) => cubit.state.referenceAnchorId,
+                  ),
+                  editedAnchorId: context.select(
+                    (CalibrationCubit cubit) => cubit.state.editedAnchorId,
+                  ),
+                  selectedPoiId: context.select(
+                    (CalibrationCubit cubit) => cubit.state.selectedPoiId,
+                  ),
+                  highlightedPoiIds: context.select(
+                    (CalibrationCubit cubit) => cubit.highlightedPoiIds(),
+                  ),
+                  referenceImageOpacity: context.select(
+                    (CalibrationCubit cubit) => cubit.state.isCalibrating
+                        ? cubit.state.referenceImageOpacity
+                        : 0.0,
+                  ),
+                ),
+
+              if (state is WallViewReady)
+                CalibrationOverlay(
+                  anchors: state.anchors,
+                  pois: state.pois,
                 ),
             ],
           );

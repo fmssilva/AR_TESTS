@@ -21,6 +21,8 @@ class WallViewCubit extends Cubit<WallViewState> {
   // Loaded once in loadConfig(); used when the PlatformView fires onViewCreated.
   List<AnchorBlueprint>? _pendingAnchors;
   List<POIModel>? _pendingPois;
+  int? _lastOverlayAnchorCount;
+  int? _lastOverlayPoiCount;
 
   WallViewCubit({
     required ARSessionBridge bridge,
@@ -82,7 +84,7 @@ class WallViewCubit extends Cubit<WallViewState> {
       );
       await FileLogger.log('initializeChannels: initializeARSession returned OK');
 
-      emit(WallViewReady(pois: pois));
+      emit(WallViewReady(anchors: anchors, pois: pois));
       await FileLogger.log('initializeChannels: emitted WallViewReady — ${pois.length} POIs');
     } catch (e, stack) {
       await FileLogger.log(
@@ -138,6 +140,18 @@ class WallViewCubit extends Cubit<WallViewState> {
       case OverlayUpdateEvent(data: final overlay):
         final current = state;
         if (current is WallViewReady) {
+          final anchorCount = overlay.anchors.length;
+          final poiCount = overlay.pois.length;
+          if (_lastOverlayAnchorCount != anchorCount ||
+              _lastOverlayPoiCount != poiCount) {
+            _lastOverlayAnchorCount = anchorCount;
+            _lastOverlayPoiCount = poiCount;
+            FileLogger.log(
+              '[OVERLAY_UPDATE] anchors=$anchorCount pois=$poiCount '
+              'origin=${overlay.originVisible} x=${overlay.axisXVisible} '
+              'y=${overlay.axisYVisible} z=${overlay.axisZVisible}',
+            );
+          }
           emit(current.copyWith(overlayData: overlay));
         }
 

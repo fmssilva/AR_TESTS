@@ -42,6 +42,7 @@ void main() {
         'ox': 0.1,
         'oy': 0.2,
         'origin_visible': false,
+        'origin_wall_distance_meters': -0.03,
         'xx': 0.3,
         'xy': 0.4,
         'axis_x_visible': true,
@@ -52,18 +53,40 @@ void main() {
         'zy': 0.8,
         'axis_z_visible': true,
         'pois': [
-          {'id': 'BL', 'label': 'BL', 'x': 0.0, 'y': 1.0},
+          {'id': 'BL', 'label': 'BL', 'x': 0.0, 'y': 1.0, 'wall_distance_meters': 0.05},
+        ],
+        'anchors': [
+          {
+            'id': 'anchor_01',
+            'tlx': 0.1,
+            'tly': 0.2,
+            'tl_wall_distance_meters': -0.01,
+            'trx': 0.3,
+            'try': 0.2,
+            'tr_wall_distance_meters': 0.02,
+            'brx': 0.3,
+            'bry': 0.4,
+            'br_wall_distance_meters': 0.03,
+            'blx': 0.1,
+            'bly': 0.4,
+            'bl_wall_distance_meters': -0.04,
+          },
         ],
       });
 
       expect(overlay.originX, 0.1);
       expect(overlay.originY, 0.2);
       expect(overlay.originVisible, isFalse);
+      expect(overlay.originWallDistanceMeters, -0.03);
       expect(overlay.axisXVisible, isTrue);
       expect(overlay.axisYVisible, isFalse);
       expect(overlay.axisZVisible, isTrue);
       expect(overlay.pois.single.x, 0.0);
       expect(overlay.pois.single.y, 1.0);
+      expect(overlay.pois.single.wallDistanceMeters, 0.05);
+      expect(overlay.anchors.single.id, 'anchor_01');
+      expect(overlay.anchors.single.tlx, 0.1);
+      expect(overlay.anchors.single.brWallDistanceMeters, 0.03);
     });
 
     test('defaults visibility flags to true for older native payloads', () {
@@ -77,12 +100,15 @@ void main() {
         'zx': 0.7,
         'zy': 0.8,
         'pois': const [],
+        'anchors': const [],
       });
 
       expect(overlay.originVisible, isTrue);
+      expect(overlay.originWallDistanceMeters, 0.0);
       expect(overlay.axisXVisible, isTrue);
       expect(overlay.axisYVisible, isTrue);
       expect(overlay.axisZVisible, isTrue);
+      expect(overlay.anchors, isEmpty);
     });
   });
 }

@@ -27,6 +27,10 @@ class WorldCoordinateManager(private val arSceneView: ARSceneView) {
 
     // Live distances to currently visible anchors — drives the proximity filter.
     private val visibleAnchors: MutableMap<String, Float> = mutableMapOf()
+    // Selected anchor lock used by the calibration tool.
+    private var calibrationAnchorLockId: String? = null
+    private var correctionFrozen = false
+    private var lastAppliedCorrectionPose: Pose? = null
 
     // Throttle per-frame correction log.
     private var correctionCount = 0
@@ -57,19 +61,59 @@ class WorldCoordinateManager(private val arSceneView: ARSceneView) {
         configuredPois = pois
     }
 
+    // Update one blueprint pose in-place for calibration nudges.
+    fun updateBlueprintPose(anchorId: String, blueprintPose: Pose) {
+        blueprintPoses[anchorId] = blueprintPose
+    }
+
+    // Lock correction to one anchor while calibrating to avoid anchor hopping.
+    fun setCalibrationAnchorLock(anchorId: String?) {
+        calibrationAnchorLockId = anchorId
+        android.util.Log.d("WorldCoordManager", "[CALIBRATION_LOCK] reference=$anchorId")
+    }
+
+    fun setCorrectionFrozen(frozen: Boolean) {
+        correctionFrozen = frozen
+        android.util.Log.d("WorldCoordManager", "[CALIBRATION_FREEZE] frozen=$frozen lock=$calibrationAnchorLockId")
+    }
+
+    fun currentCorrectionPose(): Pose? = lastAppliedCorrectionPose
+    fun isCorrectionFrozen(): Boolean = correctionFrozen
+
+    fun currentWallDistanceMeters(worldPos: Float3): Float? {
+        val correctionPose = lastAppliedCorrectionPose ?: return null
+        val local = correctionPose.inverse().transformPoint(
+            floatArrayOf(worldPos.x, worldPos.y, worldPos.z)
+        )
+        return local[2]
+    }
+
     // Apply drift correction from the given anchor if it is the closest visible one.
     // correctionPose = T_drifted × T_blueprint^-1
     // Sets worldRootNode so that any child at blueprint local position p
     // appears at correctionPose × p in AR world space.
-    fun applyCorrection(anchorId: String, driftedPose: Pose, cameraDistance: Float) {
+    fun applyCorrection(
+        anchorId: String,
+        driftedPose: Pose,
+        cameraDistance: Float,
+        ignoreFreeze: Boolean = false,
+    ) {
         visibleAnchors[anchorId] = cameraDistance
 
+        val lockedAnchorId = calibrationAnchorLockId
+        if (lockedAnchorId != null && lockedAnchorId != anchorId) return
+
         // Proximity filter: only trust the closest visible anchor.
-        val closestId = visibleAnchors.minByOrNull { it.value }?.key ?: return
-        if (closestId != anchorId) return
+        if (lockedAnchorId == null) {
+            val closestId = visibleAnchors.minByOrNull { it.value }?.key ?: return
+            if (closestId != anchorId) return
+        }
+
+        if (correctionFrozen && !ignoreFreeze) return
 
         val blueprintPose = blueprintPoses[anchorId] ?: return
         val correctionPose = driftedPose.compose(blueprintPose.inverse())
+        lastAppliedCorrectionPose = correctionPose
 
         arSceneView.post {
             worldRootNode.worldPosition = Float3(

@@ -1,0 +1,38 @@
+Not: measurements in cm, NOT meters:												
+		width	center w	center x coord: (+ x means to the right)		height	center h	center y coord: (+ y going up)	center z coord: (+ z coming out of the wall - so need to confirm if we need to invert things) 	y rot angle (+ rot means the right side of the anchor moves outer of the wall - so the anchor rotates counter clock wise - need to confirm if this is what our code expects...) 		
+Anchor_Big_0		452.8	226.4	-800		286	143	20	400	-40		
+Anchor_Big_1		640	320	-580		373	186.5	80	250	-25		
+Anchor_Big_2		432	216	-200		368	184	100	60	-10		
+Anchor_Big_3		752	376	100		375	187.5	80	50	10		
+Anchor_Big_4		407	203.5	500		287	143.5	20	200	25		
+Anchor_Big_5		331	165.5	680		297	148.5	20	350	40		
+												
+for closer anchors we measured the width and height of 10*10 mosaics and so now we just need to count the mosaics of each anchor and do the calculations: 												
+10 tiles measure:		139				141						
+	ntiles	width		center x coord: (+ x means to the right)	ntiles	height	center h	center y coord: (+ y going up)	center z coord: (+ z coming out of the wall - so need to confirm if we need to invert things) 	y rot angle (+ rot means the right side of the anchor moves outer of the wall - so the anchor rotates counter clock wise - need to confirm if this is what our code expects...) 		
+Anchor_Close_0	7	97.3	48.65	-880	8	112.8	56.4	0	450	-45		
+Anchor_Close_1	8	111.2	55.6	-750	8	112.8	56.4	-20	300	-30		
+Anchor_Close_2	11	152.9	76.45	-600	10	141	70.5	10	250	-25		
+Anchor_Close_3	11	152.9	76.45	-400	10	141	70.5	0	150	-20		
+Anchor_Close_4	7	97.3	48.65	-200	7	98.7	49.35	-10	60	-10		
+Anchor_Close_5 (lets put the origin right in the center of this anchor, so this anchor will always be ok hopefully and it serves as a solid base to config the rest) 	15	208.5	104.25	0	8	112.8	56.4	0	0	0		
+Anchor_Close_6	10	139	69.5	100	7	98.7	49.35	100	50	10		
+Anchor_Close_7	14	194.6	97.3	300	6	84.6	42.3	0	100	15		
+Anchor_Close_8	5	69.5	34.75	500	6	84.6	42.3	-50	200	25		
+Anchor_Close_9	7	97.3	48.65	580	10	141	70.5	50	250	30		
+Anchor_Close_10	5	69.5	34.75	620	7	98.7	49.35	-30	300	40		
+Anchor_Close_11	5	69.5	34.75	800	3	42.3	21.15	40	400	45		
+												
+												
+POIS:	nearest anchor	coord x: 	coord y: 	coord z: 								
+POI_Dedo	Anchor_Close_0	-880	0	450								
+POI_Flowers	Anchor_Close_1	-750	-20	300								
+POI_Map	Anchor_Close_2	-600	10	250								
+POI_Rope	Anchor_Close_3	-400	0	150								
+POI_Sign	Anchor_Close_4	-200	-10	60								
+POI_Priest	Anchor_Close_5	0	0	0								
+POI_Flag	Anchor_Close_6	100	100	50								
+POI_Boat_1	Anchor_Close_7	300	150	100								
+POI_Pen	Anchor_Close_8	500	-50	200								
+POI_Cruzeiro	Anchor_Close_9	580	50	250								
+POI_Boat_2	Anchor_Close_11	800	40	400								

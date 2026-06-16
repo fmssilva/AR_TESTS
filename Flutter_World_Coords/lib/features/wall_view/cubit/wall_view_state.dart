@@ -1,4 +1,5 @@
 import '../../../core/ar/models/overlay_data.dart';
+import '../../../core/ar/models/anchor_blueprint.dart';
 import '../../../core/ar/models/poi_model.dart';
 
 // All possible states of the AR wall view session.
@@ -13,6 +14,7 @@ class WallViewLoading extends WallViewState {
 
 // Session is active. Holds all live tracking data for the UI to render.
 class WallViewReady extends WallViewState {
+  final List<AnchorBlueprint> anchors;
   final List<POIModel> pois;
 
   // Most recently detected anchor id - drives the status chip label.
@@ -28,6 +30,7 @@ class WallViewReady extends WallViewState {
   final OverlayData? overlayData;
 
   const WallViewReady({
+    required this.anchors,
     required this.pois,
     this.activeAnchorId,
     this.detectedAnchorIds = const {},
@@ -47,6 +50,7 @@ class WallViewReady extends WallViewState {
     OverlayData? overlayData,
   }) {
     return WallViewReady(
+      anchors: anchors,
       pois: pois,
       activeAnchorId: activeAnchorId ?? this.activeAnchorId,
       detectedAnchorIds: detectedAnchorIds ?? this.detectedAnchorIds,

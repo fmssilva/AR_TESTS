@@ -14,15 +14,15 @@
       "id": "Anchor_Painting_For_Test_World_Coord",
       "image_asset_name": "Anchor_Painting_For_Test_World_Coord",
       "physical_width_meters": 1.01,
-      "blueprint_position": { "x": 1.0, "y": 1.505, "z": -0.505 },
-      "blueprint_yaw_degrees": 90.0
+        "blueprint_position": { "x": 0.0, "y": -0.015, "z": 0.035 },
+      "blueprint_yaw_degrees": 55.0
     },
     {
       "id": "Anchor_Painting_TOP_RIGHT",
       "image_asset_name": "Anchor_Painting_TOP_RIGHT",
       "physical_width_meters": 0.54,
-      "blueprint_position": { "x": 1.0, "y": 1.74, "z": -0.775 },
-      "blueprint_yaw_degrees": 90.0
+      "blueprint_position": { "x": 0.14, "y": 0.21, "z": -0.155 },
+      "blueprint_yaw_degrees": 55.0
     }
   ]
 }

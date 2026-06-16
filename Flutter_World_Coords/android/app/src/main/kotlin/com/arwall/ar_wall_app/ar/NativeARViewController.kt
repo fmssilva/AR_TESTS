@@ -21,6 +21,11 @@ import io.flutter.plugin.platform.PlatformView
 import java.io.InputStream
 import kotlin.math.sqrt
 
+private data class TrackedAnchorSnapshot(
+    val pose: com.google.ar.core.Pose,
+    val distanceMeters: Float,
+)
+
 // Native ARCore view controller - the bridge between Flutter platform channels
 // and the live ARCore + SceneView render loop.
 // One instance is created per Flutter PlatformView lifecycle.
@@ -46,9 +51,11 @@ class NativeARViewController(
     private var capturedSession: Session? = null
     // Anchors that arrived before the session was ready; applied on session creation.
     private var pendingAnchors: List<AnchorBlueprintNative>? = null
+    private val configuredAnchorsById = linkedMapOf<String, AnchorBlueprintNative>()
 
     private val worldCoordinateManager = WorldCoordinateManager(arSceneView)
     private val diagnosticRenderer     = DiagnosticRenderer(arSceneView)
+    private val calibrationRenderer    = CalibrationRenderer(arSceneView, worldCoordinateManager)
     private var poiNodeBuilder: POINodeBuilder? = null
     private var debugMode = false
 
@@ -57,6 +64,17 @@ class NativeARViewController(
     private val reportedAnchors = mutableSetOf<String>()
     private val lastPoiVisibility = mutableMapOf<String, Boolean>()
     private val lastTrackingMethods = mutableMapOf<String, AugmentedImage.TrackingMethod>()
+    private val trackedAnchors = mutableMapOf<String, TrackedAnchorSnapshot>()
+    private var lastProjectedAnchorCount = -1
+    private var lastAnchorSourceCount = -1
+    private var calibrationViewState = CalibrationViewStateNative(
+        enabled = false,
+        referenceAnchorId = null,
+        editedAnchorId = null,
+        showReferenceImage = false,
+        referenceImageOpacity = 0f,
+        freezeCorrection = false,
+    )
 
     // Throttle the per-frame log so we print once every N updates.
     private var sessionUpdateCount = 0
@@ -112,6 +130,18 @@ class NativeARViewController(
                     diagnosticRenderer.setDebugMode(debugMode)
                     result.success("ok")
                 }
+                "setCalibrationViewState" -> {
+                    val args = call.arguments as? Map<*, *>
+                    handleSetCalibrationViewState(args, result)
+                }
+                "updateAnchorBlueprint" -> {
+                    val args = call.arguments as? Map<*, *>
+                    handleUpdateAnchorBlueprint(args, result)
+                }
+                "updatePOIBlueprint" -> {
+                    val args = call.arguments as? Map<*, *>
+                    handleUpdatePOIBlueprint(args, result)
+                }
                 "pauseSession"  -> {
                     capturedSession?.pause()
                     result.success("ok")
@@ -144,6 +174,11 @@ class NativeARViewController(
         val anchors = anchorMaps.mapNotNull { AnchorBlueprintNative.from(it) }
         val pois    = poiMaps.mapNotNull    { POINative.from(it) }
 
+        configuredAnchorsById.clear()
+        for (anchor in anchors) {
+            configuredAnchorsById[anchor.id] = anchor
+        }
+
         android.util.Log.d("ARController",
             "[INIT_ARGS] Raw anchorMaps=${anchorMaps.size} poiMaps=${poiMaps.size}")
         android.util.Log.d("ARController",
@@ -156,9 +191,169 @@ class NativeARViewController(
         poiNodeBuilder?.clearAll()
         poiNodeBuilder = POINodeBuilder(pois, arSceneView, worldCoordinateManager)
         poiNodeBuilder?.buildAll()
-
         diagnosticRenderer.setDebugMode(debugMode)
         setupImageDatabase(anchors)
+
+        result.success("ok")
+    }
+
+    // Apply calibration-mode state and reserve future overlay fields.
+    private fun handleSetCalibrationViewState(
+        args: Map<*, *>?,
+        result: MethodChannel.Result
+    ) {
+        if (args == null) {
+            result.error("INVALID_ARGS", "null calibration view-state", null)
+            return
+        }
+        val viewState = CalibrationViewStateNative.from(args)
+        calibrationViewState = viewState
+        calibrationRenderer.setViewState(viewState)
+        worldCoordinateManager.setCalibrationAnchorLock(
+            if (viewState.enabled) viewState.referenceAnchorId else null
+        )
+        worldCoordinateManager.setCorrectionFrozen(viewState.freezeCorrection)
+        if (!viewState.freezeCorrection) {
+            reapplyBestCorrection(viewState.referenceAnchorId)
+        }
+        android.util.Log.d(
+            "ARController",
+            "[CALIBRATION] enabled=${viewState.enabled} frozen=${viewState.freezeCorrection} reference=${viewState.referenceAnchorId} edited=${viewState.editedAnchorId} refImage=${viewState.showReferenceImage} opacity=${viewState.referenceImageOpacity}"
+        )
+        result.success("ok")
+    }
+
+    private fun reapplyBestCorrection(referenceAnchorId: String?) {
+        val selectedSnapshot = referenceAnchorId?.let { trackedAnchors[it] }
+        if (referenceAnchorId != null && selectedSnapshot != null) {
+            android.util.Log.d(
+                "ARController",
+                "[CALIBRATION_REAPPLY] source=reference id=$referenceAnchorId dist=${selectedSnapshot.distanceMeters}"
+            )
+            worldCoordinateManager.applyCorrection(
+                referenceAnchorId,
+                selectedSnapshot.pose,
+                selectedSnapshot.distanceMeters,
+            )
+            return
+        }
+
+        val closest = trackedAnchors.minByOrNull { it.value.distanceMeters } ?: return
+        android.util.Log.d(
+            "ARController",
+            "[CALIBRATION_REAPPLY] source=fallback_closest id=${closest.key} dist=${closest.value.distanceMeters} requested_reference=$referenceAnchorId"
+        )
+        worldCoordinateManager.applyCorrection(
+            closest.key,
+            closest.value.pose,
+            closest.value.distanceMeters,
+        )
+    }
+
+    // Update one anchor blueprint and re-apply correction from the last tracked pose.
+    private fun handleUpdateAnchorBlueprint(
+        args: Map<*, *>?,
+        result: MethodChannel.Result
+    ) {
+        if (args == null) {
+            result.error("INVALID_ARGS", "null anchor blueprint payload", null)
+            return
+        }
+        val id = args["id"] as? String
+        val x = (args["blueprint_x"] as? Number)?.toFloat()
+        val y = (args["blueprint_y"] as? Number)?.toFloat()
+        val z = (args["blueprint_z"] as? Number)?.toFloat()
+        val yawDegrees = (args["blueprint_yaw_degrees"] as? Number)?.toFloat()
+        val physicalWidthMeters = (args["physical_width_meters"] as? Number)?.toFloat()
+        if (id == null || x == null || y == null || z == null || yawDegrees == null) {
+            result.error("INVALID_ARGS", "missing anchor blueprint fields", null)
+            return
+        }
+
+        val existing = configuredAnchorsById[id]
+        if (existing == null) {
+            result.error("NOT_FOUND", "unknown anchor id '$id'", null)
+            return
+        }
+
+        val updated = existing.copy(
+            physicalWidthMeters = physicalWidthMeters ?: existing.physicalWidthMeters,
+            blueprintPose = AnchorBlueprintNative.buildBlueprintPose(x, y, z, yawDegrees)
+        )
+        configuredAnchorsById[id] = updated
+        worldCoordinateManager.updateBlueprintPose(id, updated.blueprintPose)
+        calibrationRenderer.updateAnchorBlueprint(id, updated)
+        val updatesWorldCorrection = calibrationViewState.referenceAnchorId == id
+        android.util.Log.d(
+            "ARController",
+            "[CALIBRATION_ANCHOR_UPDATE] id=$id updates_world=$updatesWorldCorrection reference=${calibrationViewState.referenceAnchorId} edited=${calibrationViewState.editedAnchorId} freeze=${worldCoordinateManager.isCorrectionFrozen()}"
+        )
+        if (calibrationViewState.referenceAnchorId == id) {
+            trackedAnchors[id]?.let { snapshot ->
+                android.util.Log.d(
+                    "ARController",
+                    "[CALIBRATION_ANCHOR_UPDATE] applying_reference_correction id=$id dist=${snapshot.distanceMeters} ignoreFreeze=true"
+                )
+                worldCoordinateManager.applyCorrection(
+                    id,
+                    snapshot.pose,
+                    snapshot.distanceMeters,
+                    ignoreFreeze = true,
+                )
+            } ?: android.util.Log.d(
+                "ARController",
+                "[CALIBRATION_ANCHOR_UPDATE] reference '$id' has no tracked snapshot yet; world correction unchanged"
+            )
+        } else {
+            android.util.Log.d(
+                "ARController",
+                "[CALIBRATION_ANCHOR_UPDATE] local anchor '$id' updated without world correction reapply"
+            )
+        }
+
+        if (worldCoordinateManager.isCorrectionFrozen() &&
+            calibrationViewState.referenceAnchorId == id) {
+            android.util.Log.d(
+                "ARController",
+                "[CALIBRATION_FREEZE] recalculated frozen correction from reference anchor '$id' using stored tracked pose"
+            )
+        }
+
+        android.util.Log.d(
+            "ARController",
+            "[CALIBRATION] Anchor '$id' updated to ($x, $y, $z) yaw=$yawDegrees width=${updated.physicalWidthMeters}"
+        )
+        result.success("ok")
+    }
+
+    // Update one POI blueprint marker in-place.
+    private fun handleUpdatePOIBlueprint(
+        args: Map<*, *>?,
+        result: MethodChannel.Result
+    ) {
+        if (args == null) {
+            result.error("INVALID_ARGS", "null POI blueprint payload", null)
+            return
+        }
+        val id = args["id"] as? String
+        val x = (args["blueprint_x"] as? Number)?.toFloat()
+        val y = (args["blueprint_y"] as? Number)?.toFloat()
+        val z = (args["blueprint_z"] as? Number)?.toFloat()
+        if (id == null || x == null || y == null || z == null) {
+            result.error("INVALID_ARGS", "missing POI blueprint fields", null)
+            return
+        }
+
+        val updated = poiNodeBuilder?.updateNodePosition(id, x, y, z) ?: false
+        if (!updated) {
+            result.error("NOT_FOUND", "unknown POI id '$id'", null)
+            return
+        }
+
+        android.util.Log.d(
+            "ARController",
+            "[CALIBRATION_POI_UPDATE] id=$id x=$x y=$y z=$z reference=${calibrationViewState.referenceAnchorId} freeze=${worldCoordinateManager.isCorrectionFrozen()} world_correction_unchanged=true"
+        )
 
         result.success("ok")
     }
@@ -203,6 +398,9 @@ class NativeARViewController(
                 }
                 android.util.Log.d("ARController",
                     "[IMAGE_DB] Bitmap decoded: ${bitmap.width}x${bitmap.height}")
+                configuredAnchorsById[anchor.id] = anchor.copy(
+                    imageAspectRatio = bitmap.height.toFloat() / bitmap.width.toFloat()
+                )
                 android.util.Log.d("ARController",
                     "[IMAGE_DB] Configured physical width for '${anchor.id}': " +
                     "${anchor.physicalWidthMeters}m (ARCore uses width only; height follows bitmap aspect ratio)")
@@ -227,6 +425,7 @@ class NativeARViewController(
         config.focusMode   = Config.FocusMode.AUTO
         config.updateMode  = Config.UpdateMode.LATEST_CAMERA_IMAGE
         session.configure(config)
+        calibrationRenderer.configureAnchors(configuredAnchorsById.values)
 
         android.util.Log.d("ARController",
             "ARCore image database configured with $addedCount images")
@@ -298,6 +497,7 @@ class NativeARViewController(
                     TrackingState.STOPPED  -> {
                         reportedAnchors.remove(image.name)
                         lastTrackingMethods.remove(image.name)
+                        trackedAnchors.remove(image.name)
                         worldCoordinateManager.anchorLost(image.name)
                         sendEvent(mapOf(
                             "type" to "anchor_lost",
@@ -334,6 +534,7 @@ class NativeARViewController(
         }
 
         if (trackingMethod != AugmentedImage.TrackingMethod.FULL_TRACKING) {
+            trackedAnchors.remove(image.name)
             worldCoordinateManager.anchorLost(image.name)
             return
         }
@@ -346,6 +547,8 @@ class NativeARViewController(
         val dz = pose.tz() - cameraPose.tz()
         val dist = sqrt((dx * dx + dy * dy + dz * dz).toDouble()).toFloat()
 
+        trackedAnchors[image.name] = TrackedAnchorSnapshot(pose, dist)
+        calibrationRenderer.onAnchorTracked(image)
         worldCoordinateManager.applyCorrection(image.name, pose, dist)
 
         if (image.name !in reportedAnchors) {
@@ -396,6 +599,29 @@ class NativeARViewController(
         )
     }
 
+    // Variant for calibration quads: keep points that are in front of the camera even if
+    // they are slightly outside the viewport so Flutter can still draw partially visible borders.
+    private fun worldToScreenUnclipped(
+        worldPos: Float3,
+        viewMatrix: FloatArray,
+        projMatrix: FloatArray,
+        viewWidth: Float,
+        viewHeight: Float
+    ): Pair<Float, Float>? {
+        val mvp  = FloatArray(16)
+        Matrix.multiplyMM(mvp, 0, projMatrix, 0, viewMatrix, 0)
+        val clip = FloatArray(4)
+        Matrix.multiplyMV(clip, 0, mvp, 0,
+            floatArrayOf(worldPos.x, worldPos.y, worldPos.z, 1f), 0)
+        if (clip[3] <= 0f) return null
+        val ndcX = clip[0] / clip[3]
+        val ndcY = clip[1] / clip[3]
+        return Pair(
+            (ndcX + 1f) / 2f,
+            (1f - ndcY) / 2f
+        )
+    }
+
     // Called on main thread (via arSceneView.post) every 3 frames when a valid world transform exists.
     // Reads current worldPositions and projects them to 2D screen coords for Flutter overlay.
     private fun sendOverlayUpdate(
@@ -405,24 +631,71 @@ class NativeARViewController(
         vh: Float
     ) {
         fun ws(p: Float3) = worldToScreen(p, viewMatrix, projMatrix, vw, vh)
+        fun wsUnclipped(p: Float3) = worldToScreenUnclipped(p, viewMatrix, projMatrix, vw, vh)
 
         val wcm    = worldCoordinateManager
-        val origin = ws(wcm.worldRootNode.worldPosition)
+        val origin = wsUnclipped(wcm.worldRootNode.worldPosition)
 
-        val axisX = ws(wcm.xAxisMarker.worldPosition)
-        val axisY = ws(wcm.yAxisMarker.worldPosition)
-        val axisZ = ws(wcm.zAxisMarker.worldPosition)
+        val axisX = wsUnclipped(wcm.xAxisMarker.worldPosition)
+        val axisY = wsUnclipped(wcm.yAxisMarker.worldPosition)
+        val axisZ = wsUnclipped(wcm.zAxisMarker.worldPosition)
 
         val fallbackOrigin = origin ?: Pair(Float.NaN, Float.NaN)
         val fallbackAxisX = axisX ?: Pair(Float.NaN, Float.NaN)
         val fallbackAxisY = axisY ?: Pair(Float.NaN, Float.NaN)
         val fallbackAxisZ = axisZ ?: Pair(Float.NaN, Float.NaN)
+        val originWallDistance = currentObservedWallDistanceMeters(
+            wcm.worldRootNode.worldPosition
+        ) ?: 0f
 
         val poisList = poiNodeBuilder?.getNodePositions()
             ?.mapNotNull { (id, label, worldPos) ->
                 val ss = ws(worldPos) ?: return@mapNotNull null
-                mapOf("id" to id, "label" to label, "x" to ss.first, "y" to ss.second)
+                mapOf(
+                    "id" to id,
+                    "label" to label,
+                    "x" to ss.first,
+                    "y" to ss.second,
+                    "wall_distance_meters" to (currentObservedWallDistanceMeters(worldPos) ?: 0f),
+                )
             } ?: emptyList()
+
+        val anchorSources = calibrationRenderer.getAnchorScreenSources()
+        val anchorsList = anchorSources
+            .mapNotNull { source ->
+                val topLeft = wsUnclipped(source.topLeft) ?: return@mapNotNull null
+                val topRight = wsUnclipped(source.topRight) ?: return@mapNotNull null
+                val bottomRight = wsUnclipped(source.bottomRight) ?: return@mapNotNull null
+                val bottomLeft = wsUnclipped(source.bottomLeft) ?: return@mapNotNull null
+                mapOf(
+                    "id" to source.id,
+                    "tlx" to topLeft.first,
+                    "tly" to topLeft.second,
+                    "tl_wall_distance_meters" to (currentObservedWallDistanceMeters(source.topLeft) ?: 0f),
+                    "trx" to topRight.first,
+                    "try" to topRight.second,
+                    "tr_wall_distance_meters" to (currentObservedWallDistanceMeters(source.topRight) ?: 0f),
+                    "brx" to bottomRight.first,
+                    "bry" to bottomRight.second,
+                    "br_wall_distance_meters" to (currentObservedWallDistanceMeters(source.bottomRight) ?: 0f),
+                    "blx" to bottomLeft.first,
+                    "bly" to bottomLeft.second,
+                    "bl_wall_distance_meters" to (currentObservedWallDistanceMeters(source.bottomLeft) ?: 0f),
+                )
+            }
+
+        if (anchorSources.size != lastAnchorSourceCount || anchorsList.size != lastProjectedAnchorCount) {
+            lastAnchorSourceCount = anchorSources.size
+            lastProjectedAnchorCount = anchorsList.size
+            val droppedIds = anchorSources.map { it.id }.toSet() - anchorsList.map { it["id"] as String }.toSet()
+            val selected = anchorsList.firstOrNull()?.let {
+                "${it["id"]} tl=(${it["tlx"]},${it["tly"]},d=${it["tl_wall_distance_meters"]}) tr=(${it["trx"]},${it["try"]},d=${it["tr_wall_distance_meters"]}) br=(${it["brx"]},${it["bry"]},d=${it["br_wall_distance_meters"]}) bl=(${it["blx"]},${it["bly"]},d=${it["bl_wall_distance_meters"]})"
+            } ?: "none"
+            android.util.Log.d(
+                "ARProjection",
+                "[CALIBRATION_ANCHOR_PROJECTION] sources=${anchorSources.size} projected=${anchorsList.size} dropped=${droppedIds.joinToString(",").ifEmpty { "none" }} first=$selected"
+            )
+        }
 
         logPoiVisibilityTransitions(poisList.map { it["id"] as String }.toSet())
 
@@ -430,6 +703,7 @@ class NativeARViewController(
         eventSink?.success(mapOf(
             "type" to "overlay_update",
             "ox"   to fallbackOrigin.first.toDouble(),  "oy"  to fallbackOrigin.second.toDouble(),
+            "origin_wall_distance_meters" to originWallDistance.toDouble(),
             "xx"   to fallbackAxisX.first.toDouble(),   "xy"  to fallbackAxisX.second.toDouble(),
             "yx"   to fallbackAxisY.first.toDouble(),   "yy"  to fallbackAxisY.second.toDouble(),
             "zx"   to fallbackAxisZ.first.toDouble(),   "zy"  to fallbackAxisZ.second.toDouble(),
@@ -437,8 +711,22 @@ class NativeARViewController(
             "axis_x_visible" to (axisX != null),
             "axis_y_visible" to (axisY != null),
             "axis_z_visible" to (axisZ != null),
-            "pois" to poisList
+            "pois" to poisList,
+            "anchors" to anchorsList,
         ))
+    }
+
+    private fun currentObservedWallDistanceMeters(worldPos: Float3): Float? {
+        val selectedSnapshot = calibrationViewState.referenceAnchorId?.let { trackedAnchors[it] }
+        val referenceSnapshot = selectedSnapshot
+            ?: trackedAnchors.minByOrNull { it.value.distanceMeters }?.value
+            ?: return null
+        val local = referenceSnapshot.pose.inverse().transformPoint(
+            floatArrayOf(worldPos.x, worldPos.y, worldPos.z)
+        )
+        // ARCore augmented-image local +Y is the image normal, so this is a real
+        // measured signed distance from the currently observed wall plane.
+        return local[1]
     }
 
     private fun openAnchorAsset(primaryPath: String, fallbackPath: String): InputStream {
