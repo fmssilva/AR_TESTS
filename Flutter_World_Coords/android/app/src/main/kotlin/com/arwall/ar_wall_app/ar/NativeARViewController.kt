@@ -54,6 +54,7 @@ class NativeARViewController(
     private val configuredAnchorsById = linkedMapOf<String, AnchorBlueprintNative>()
 
     private val worldCoordinateManager = WorldCoordinateManager(arSceneView)
+    private val detectionPipeline = AnchorDetectionPipeline(worldCoordinateManager)
     private val diagnosticRenderer     = DiagnosticRenderer(arSceneView)
     private val calibrationRenderer    = CalibrationRenderer(arSceneView, worldCoordinateManager)
     private var poiNodeBuilder: POINodeBuilder? = null
@@ -226,6 +227,7 @@ class NativeARViewController(
     private fun reapplyBestCorrection(referenceAnchorId: String?) {
         val selectedSnapshot = referenceAnchorId?.let { trackedAnchors[it] }
         if (referenceAnchorId != null && selectedSnapshot != null) {
+            detectionPipeline.reset()
             android.util.Log.d(
                 "ARController",
                 "[CALIBRATION_REAPPLY] source=reference id=$referenceAnchorId dist=${selectedSnapshot.distanceMeters}"
@@ -239,6 +241,7 @@ class NativeARViewController(
         }
 
         val closest = trackedAnchors.minByOrNull { it.value.distanceMeters } ?: return
+        detectionPipeline.reset()
         android.util.Log.d(
             "ARController",
             "[CALIBRATION_REAPPLY] source=fallback_closest id=${closest.key} dist=${closest.value.distanceMeters} requested_reference=$referenceAnchorId"
@@ -290,6 +293,7 @@ class NativeARViewController(
         )
         if (calibrationViewState.referenceAnchorId == id) {
             trackedAnchors[id]?.let { snapshot ->
+                detectionPipeline.reset()
                 android.util.Log.d(
                     "ARController",
                     "[CALIBRATION_ANCHOR_UPDATE] applying_reference_correction id=$id dist=${snapshot.distanceMeters} ignoreFreeze=true"
@@ -479,6 +483,7 @@ class NativeARViewController(
                 android.util.Log.d("ARController",
                     "[SESSION] onSessionUpdated #$sessionUpdateCount — still alive")
             }
+
             // Throttle: project world positions to screen ~10fps (every 3 frames).
             if (sessionUpdateCount % 3 == 0 && worldCoordinateManager.worldRootNode.isVisible) {
                 val viewMatrix = FloatArray(16)
@@ -498,7 +503,7 @@ class NativeARViewController(
                         reportedAnchors.remove(image.name)
                         lastTrackingMethods.remove(image.name)
                         trackedAnchors.remove(image.name)
-                        worldCoordinateManager.anchorLost(image.name)
+                        detectionPipeline.onAnchorLost(image.name)
                         sendEvent(mapOf(
                             "type" to "anchor_lost",
                             "anchor_id" to image.name
@@ -533,12 +538,6 @@ class NativeARViewController(
                 "[TRACKING] Anchor '${image.name}' method ${previousTrackingMethod?.name ?: "NONE"} -> ${trackingMethod.name}")
         }
 
-        if (trackingMethod != AugmentedImage.TrackingMethod.FULL_TRACKING) {
-            trackedAnchors.remove(image.name)
-            worldCoordinateManager.anchorLost(image.name)
-            return
-        }
-
         val pose       = image.centerPose
         val cameraPose = frame.camera.pose
 
@@ -547,9 +546,24 @@ class NativeARViewController(
         val dz = pose.tz() - cameraPose.tz()
         val dist = sqrt((dx * dx + dy * dy + dz * dz).toDouble()).toFloat()
 
+        detectionPipeline.onDetection(
+            RawAnchorDetection(
+                anchorId = image.name,
+                trackingMethod = trackingMethod,
+                pose = pose,
+                distanceMeters = dist,
+                extentXMeters = image.extentX,
+                extentZMeters = image.extentZ,
+            )
+        )
+
+        if (trackingMethod != AugmentedImage.TrackingMethod.FULL_TRACKING) {
+            trackedAnchors.remove(image.name)
+            return
+        }
+
         trackedAnchors[image.name] = TrackedAnchorSnapshot(pose, dist)
         calibrationRenderer.onAnchorTracked(image)
-        worldCoordinateManager.applyCorrection(image.name, pose, dist)
 
         if (image.name !in reportedAnchors) {
             reportedAnchors.add(image.name)
